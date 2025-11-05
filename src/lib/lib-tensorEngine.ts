@@ -17,6 +17,17 @@ export interface TensorCellComputation {
   recursionGain: number;
 }
 
+export interface TensorAspectDetail {
+  fieldIndex: number;
+  planeIndex: number;
+  fieldName: string;
+  planeName: string;
+  phi: number;
+  gravity: number;
+  salience: number;
+  values: Record<string, number>;
+}
+
 export interface ComputeOptions {
   recursionDepth?: number;
 }
@@ -134,6 +145,30 @@ export class TensorEngine {
       });
     });
     return overlay;
+  }
+
+  getAspect(fieldIndex: number, planeIndex: number, options: ComputeOptions = {}): TensorAspectDetail {
+    const field = getFieldByIndex(fieldIndex);
+    const plane = getPlaneByIndex(planeIndex);
+
+    if (!field || !plane) {
+      throw new Error(`Invalid lattice coordinate f${fieldIndex}-p${planeIndex}`);
+    }
+
+    const computation = this.computeCellValues(fieldIndex, planeIndex, options);
+    const gravity = computation.values.semanticGravity ?? 0;
+    const salience = computation.values.livedSalience ?? 0;
+
+    return {
+      fieldIndex,
+      planeIndex,
+      fieldName: `${field.symbol} · ${field.label}`,
+      planeName: `${plane.symbol} · ${plane.label}`,
+      phi: PHI,
+      gravity,
+      salience,
+      values: computation.values,
+    };
   }
 
   private phiBoundedProportion(seed: number): number {

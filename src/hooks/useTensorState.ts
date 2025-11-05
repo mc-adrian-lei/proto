@@ -1,83 +1,71 @@
 import { useCallback, useMemo, useState } from "react";
-import type { CognitiveAspect } from "../data/cognitiveLattice";
-import type { TensorCellComputation, TensorEngine } from "../lib/lib-tensorEngine";
+import { COGNITIVE_FIELDS } from "../lib/lib-fields";
+import { CONSCIOUSNESS_PLANES } from "../lib/lib-planes";
+import { tensorEngine } from "../lib/tensorEngine";
+
+export interface SelectedCoordinate {
+  fieldIndex: number;
+  planeIndex: number;
+}
 
 export interface UseTensorStateResult {
-  selectedAspect: CognitiveAspect | null;
-  tensorValues?: TensorCellComputation;
+  selected: SelectedCoordinate | null;
+  setSelected: (coordinate: SelectedCoordinate | null) => void;
   overlay: Record<string, number>;
-  selectedPropertyId: string;
-  setSelectedPropertyId: (id: string) => void;
-  showRecursion: boolean;
+  tensorProperties: { id: string; label: string }[];
+  selectedProperty: string;
+  setSelectedProperty: (propertyId: string) => void;
+  recursionEnabled: boolean;
   toggleRecursion: () => void;
-  recursionDepth: number;
-  showArchetypes: boolean;
+  archetypesEnabled: boolean;
   toggleArchetypes: () => void;
-  selectAspect: (fieldIndex: number, planeIndex: number) => void;
-  clearSelection: () => void;
+  recursionDepth: number;
 }
 
-export interface UseTensorStateOptions {
-  engine: TensorEngine;
-  lattice: CognitiveAspect[][];
-}
+const FIRST_COORDINATE: SelectedCoordinate | null =
+  COGNITIVE_FIELDS.length && CONSCIOUSNESS_PLANES.length
+    ? { fieldIndex: COGNITIVE_FIELDS[0].index, planeIndex: CONSCIOUSNESS_PLANES[0].index }
+    : null;
 
-export function useTensorState({ engine, lattice }: UseTensorStateOptions): UseTensorStateResult {
-  const [selectedPropertyId, setSelectedPropertyId] = useState(engine.properties[0]?.id ?? "");
-  const [selectedCoordinate, setSelectedCoordinate] = useState<{ fieldIndex: number; planeIndex: number } | null>(
-    lattice[0]?.[0] ? { fieldIndex: lattice[0][0].fieldIndex, planeIndex: lattice[0][0].planeIndex } : null,
-  );
-  const [showRecursion, setShowRecursion] = useState(false);
-  const [showArchetypes, setShowArchetypes] = useState(false);
+export function useTensorState(): UseTensorStateResult {
+  const [selected, setSelected] = useState<SelectedCoordinate | null>(FIRST_COORDINATE);
+  const [selectedProperty, setSelectedProperty] = useState<string>(tensorEngine.properties[0]?.id ?? "");
+  const [recursionEnabled, setRecursionEnabled] = useState(false);
+  const [archetypesEnabled, setArchetypesEnabled] = useState(false);
 
-  const recursionDepth = showRecursion ? 3 : 1;
-
-  const selectedAspect = useMemo(() => {
-    if (!selectedCoordinate) return null;
-    const row = lattice[selectedCoordinate.fieldIndex];
-    return row?.[selectedCoordinate.planeIndex] ?? null;
-  }, [lattice, selectedCoordinate]);
+  const recursionDepth = recursionEnabled ? 3 : 1;
 
   const overlay = useMemo(() => {
-    if (!selectedPropertyId) {
+    if (!selectedProperty) {
       return {};
     }
-    return engine.computeOverlay(selectedPropertyId, { recursionDepth });
-  }, [engine, recursionDepth, selectedPropertyId]);
+    return tensorEngine.computeOverlay(selectedProperty, { recursionDepth });
+  }, [recursionDepth, selectedProperty]);
 
-  const tensorValues = useMemo(() => {
-    if (!selectedAspect) return undefined;
-    return engine.computeCellValues(selectedAspect.fieldIndex, selectedAspect.planeIndex, { recursionDepth });
-  }, [engine, recursionDepth, selectedAspect]);
-
-  const selectAspect = useCallback((fieldIndex: number, planeIndex: number) => {
-    setSelectedCoordinate({ fieldIndex, planeIndex });
-  }, []);
-
-  const clearSelection = useCallback(() => {
-    setSelectedCoordinate(null);
-  }, []);
+  const tensorProperties = useMemo(
+    () => tensorEngine.properties.map((property) => ({ id: property.id, label: property.label })),
+    [],
+  );
 
   const toggleRecursion = useCallback(() => {
-    setShowRecursion((value) => !value);
+    setRecursionEnabled((value) => !value);
   }, []);
 
   const toggleArchetypes = useCallback(() => {
-    setShowArchetypes((value) => !value);
+    setArchetypesEnabled((value) => !value);
   }, []);
 
   return {
-    selectedAspect,
-    tensorValues,
+    selected,
+    setSelected,
     overlay,
-    selectedPropertyId,
-    setSelectedPropertyId,
-    showRecursion,
+    tensorProperties,
+    selectedProperty,
+    setSelectedProperty,
+    recursionEnabled,
     toggleRecursion,
-    recursionDepth,
-    showArchetypes,
+    archetypesEnabled,
     toggleArchetypes,
-    selectAspect,
-    clearSelection,
+    recursionDepth,
   };
 }
