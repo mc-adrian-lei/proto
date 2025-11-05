@@ -2,9 +2,11 @@ import { Slot } from "@radix-ui/react-slot";
 import { cn } from "../../lib/utils";
 import type { ButtonHTMLAttributes } from "react";
 
+type ButtonVariant = "primary" | "ghost";
+
 type ButtonProps = {
   asChild?: boolean;
-  variant?: "primary" | "ghost";
+  variant?: ButtonVariant;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 export function Button({
@@ -14,7 +16,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const Component = asChild ? Slot : "button";
-  const variants: Record<typeof variant, string> = {
+  const variants: Record<ButtonVariant, string> = {
     primary:
       "bg-indigo-500/80 hover:bg-indigo-400 text-white border border-white/10 backdrop-blur-sm",
     ghost: "bg-white/10 hover:bg-white/20 text-white border border-white/10",
