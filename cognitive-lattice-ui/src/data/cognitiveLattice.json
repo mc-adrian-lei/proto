@@ -1,0 +1,9 @@
+{
+  "fields": ["Priming", "Orienting", "Detecting", "Synthesizing", "Reconstructive", "Reporting"],
+  "planes": ["Base", "Subconscious", "Supra-Conscious", "Meta-Reflective", "Org", "Noetic"],
+  "tensorProperties": ["Affect", "Gravity", "Salience", "Memory"],
+  "archetypes": {
+    "Zeus": { "icon": "⚡", "color": "#fb0", "desc": "Priming meta-order" },
+    "Apollo": { "icon": "☉", "color": "#6f9", "desc": "Harmonic revelation" }
+  }
+}
