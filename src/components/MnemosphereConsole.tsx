@@ -367,6 +367,7 @@ export default function MnemosphereConsole() {
   const [chatLog, setChatLog] = useState<LogMessage[]>([
     { role: "system", text: "Console Online. Initializing Wavefront..." },
   ]);
+  const logEndRef = useRef<HTMLDivElement | null>(null);
 
   const isDead = soulAge >= MAX_AGE;
 
@@ -399,6 +400,10 @@ export default function MnemosphereConsole() {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
   }, [isPlaying, neuralState.label, isDead]);
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatLog]);
 
   const activeTrauma = useMemo(() => aspects.some((a) => a.trauma), [aspects]);
 
@@ -787,7 +792,7 @@ export default function MnemosphereConsole() {
                   <Loader2 size={12} className="animate-spin" /> Synchronizing...
                 </div>
               )}
-              <div className="h-4" />
+              <div ref={logEndRef} className="h-4" />
             </div>
 
             <div className="p-3 bg-slate-950/80 border-t border-slate-800">
